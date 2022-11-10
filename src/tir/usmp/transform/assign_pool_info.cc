@@ -32,13 +32,19 @@ namespace tvm {
 namespace tir {
 namespace usmp {
 
-/*! \brief Assign PoolInfo objects to allocate that does not have any.
- * The schedulers have the oppurtunity to assign PoolInfo objects to
- * allocate nodes. However, each allocate node is expected to have
- * at least one PoolInfo node assigned to it. If it was not the case,
- * this Pass will assign all PoolInfo objects that the target could
- * access.*/
-class PoolInfoAssigner : public StmtExprMutator {
+inline bool IsSameStorageScope(std::string pool_scope, std::string buffer_scope) {
+  return buffer_scope.find(pool_scope) != std::string::npos;
+}
+
+inline bool
+
+    /*! \brief Assign PoolInfo objects to allocate that does not have any.
+     * The schedulers have the oppurtunity to assign PoolInfo objects to
+     * allocate nodes. However, each allocate node is expected to have
+     * at least one PoolInfo node assigned to it. If it was not the case,
+     * this Pass will assign all PoolInfo objects that the target could
+     * access.*/
+    class PoolInfoAssigner : public StmtExprMutator {
  public:
   explicit PoolInfoAssigner(const IRModule& module) {
     PrimFunc main_func =
@@ -132,6 +138,7 @@ Stmt PoolInfoAssigner::VisitStmt_(const AllocateNode* op) {
   Optional<Target> tgt = func_->GetAttr<Target>(tvm::attr::kTarget).value();
   ICHECK(tgt) << "The following PrimFunc does not have a target attr: \n" << func_;
   Map<String, ObjectRef> annotations = Map<String, ObjectRef>(op->annotations);
+  // jlsfix - kPoolCandidatesAllocateAttr should be set to one where the storage scope matches.
   if (op->annotations.find(kPoolCandidatesAllocateAttr) == op->annotations.end()) {
     ICHECK(target_pool_infos_.count(tgt.value()->str()) > 0)
         << "Target " << PrettyPrint(tgt) << " not found among " << PrettyPrint(target_pool_infos_);
@@ -150,6 +157,7 @@ Stmt PoolInfoAssigner::VisitStmt_(const AllocateConstNode* op) {
   Optional<Target> tgt = func_->GetAttr<Target>(tvm::attr::kTarget).value();
   ICHECK(tgt) << "The following PrimFunc does not have a target attr: \n" << func_;
   Map<String, ObjectRef> annotations = Map<String, ObjectRef>(op->annotations);
+  // jlsfix - kPoolCandidatesAllocateAttr should be set to one where the storage scope matches.
   if (op->annotations.find(kPoolCandidatesAllocateAttr) == op->annotations.end()) {
     annotations.Set(kPoolCandidatesAllocateAttr, target_const_pool_infos_[tgt.value()->str()]);
     annotations.Set(kTargetPoolReadOnlyAccess, Integer(1));

@@ -37,7 +37,8 @@ class VtcmAllocator : public StmtExprMutator {
 
   Stmt VisitStmt_(const AllocateNode* op) final {
     std::string storage_scope = GetStorageScope(op->buffer_var);
-    if (IsVtcmStorage(storage_scope)) {
+    if (IsVtcmStorage(storage_scope)) {  // jlsfix - only do this if there is no global.vtcm pool?
+                                         // Or if there's no pool assigned?
       Stmt body = this->VisitStmt(op->body);
       Array<PrimExpr> args;
       args.push_back(StringImm(storage_scope));

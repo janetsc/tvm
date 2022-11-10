@@ -23,6 +23,13 @@ import tvm.testing
 from tvm import relay
 from tvm.contrib.hexagon.session import Session
 from tvm.relay.backend import Executor, Runtime
+from tvm import (
+    WorkspaceMemoryPools,
+    ConstantMemoryPools,
+    WorkspacePoolInfo,
+    ConstantPoolInfo,
+    PoolInfoProperties,
+)
 from tvm.testing.usmp import is_tvm_backendallocworkspace_calls
 
 
@@ -71,6 +78,17 @@ def test_conv2d(hexagon_session: Session, aot_host_target, aot_target, usmp_enab
 
     params = {"weight1": weight1_data, "weight2": weight2_data}
     inputs = {"data": input_data}
+
+    target=tvm.target.Target(aot_target, host=aot_host_target)
+
+    workspace_memory_pools = WorkspaceMemoryPools(
+        [
+            WorkspacePoolInfo(
+                "vtcm_workspace_pool", [target], PoolInfoProperties(size_hint_bytes=(4 * 1024 * 1024))
+                #jlsfix - include scope
+            ),
+        ]
+    )
 
     with tvm.transform.PassContext(opt_level=3, config={"tir.usmp.enable": usmp_enabled}):
         lowered = tvm.relay.build(
