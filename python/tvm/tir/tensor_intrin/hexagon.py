@@ -30,8 +30,6 @@ def dot_product_32x4_u8u8i32_desc(
         T.reads(C[0:32], A[0:4], B[0:32, 0:4])
         T.writes(C[0:32])
         for i in T.serial(0, 32):
-            with T.init():
-                C[i] = T.int32(0)
             for k in T.serial(0, 4):
                 with T.block("update"):
                     vi, vk = T.axis.remap("SR", [i, k])
@@ -74,8 +72,6 @@ def dot_product_32x4_u8i8i32_desc(
         T.reads(C[0:32], A[0:4], B[0:32, 0:4])
         T.writes(C[0:32])
         for i in T.serial(0, 32):
-            with T.init():
-                C[i] = T.int32(0)
             for k in T.serial(0, 4):
                 with T.block("update"):
                     vi, vk = T.axis.remap("SR", [i, k])

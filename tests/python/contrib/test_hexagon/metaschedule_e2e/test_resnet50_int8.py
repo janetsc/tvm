@@ -33,6 +33,7 @@ from tvm.contrib.hexagon.meta_schedule import (
 )
 from tvm.meta_schedule import postproc, schedule_rule
 from tvm.tir.schedule import BlockRV, Schedule
+from tvm.tir.schedule.analysis import has_block
 from tvm.tir.tensor_intrin.hexagon import VRMPY_u8i8i32_INTRIN, VRMPY_u8u8i32_INTRIN
 
 from ..infrastructure import get_hexagon_target
@@ -206,9 +207,9 @@ def _schedule_packed_8x8x32_conv2d():
 
     def schedule_fn(sch, conv2d_block: Optional[BlockRV] = None) -> bool:
         if conv2d_block is None:
-            try:
+            if has_block(sch, "conv2d_NCHWc_int8"):
                 conv2d_block = sch.get_block("conv2d_NCHWc_int8")
-            except ValueError:
+            else:
                 return False
 
         assert "conv2d_NCHWc_int8" in sch.get(conv2d_block).annotations["schedule_rule"]
@@ -247,8 +248,9 @@ def _schedule_packed_8x8x32_conv2d():
 
         # Add cache for input and output activation layout transform,
         # note that weight is already in correct layout
-        input_cache = sch.cache_read(conv2d_block, 0, "global")  # pylint: disable=unused-variable
-        output_cache = sch.cache_write(outer_block, 0, "global")  # pylint: disable=unused-variable
+        # pylint: disable=unused-variable
+        input_cache = sch.cache_read(conv2d_block, 0, "global.vtcm")
+        output_cache = sch.cache_write(outer_block, 0, "global.vtcm")
         # Transform the layout of the input
         sch.transform_layout(
             conv2d_block, ("read", 0), index_map=index_map_nchw32c_nchw8h8w32c, pad_value=0

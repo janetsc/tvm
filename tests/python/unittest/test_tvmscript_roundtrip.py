@@ -90,9 +90,9 @@ def opt_gemm_lower():
         def mmult(A: T.handle, B: T.handle, C: T.handle) -> None:
             # function attr dict
             T.func_attr({"global_symbol": "mmult", "tir.noalias": True})
-            A_1 = T.match_buffer(A, [1024 * 1024], elem_offset=0, align=64, offset_factor=1)
+            A_1 = T.match_buffer(A, [16384], elem_offset=0, align=64, offset_factor=1)
             B_1 = T.match_buffer(B, [1024, 1024], elem_offset=0, align=64, offset_factor=1)
-            C_1 = T.match_buffer(C, [1024 * 1024], elem_offset=0, align=64, offset_factor=1)
+            C_1 = T.match_buffer(C, [16384], elem_offset=0, align=64, offset_factor=1)
             # body
             packedB_data = T.allocate([32768], "float32", "global")
             packedB = T.buffer_decl(
@@ -3008,7 +3008,7 @@ def comm_reducer_single_reduce_group():
     def comm_reducer_single_reduce_group(a: T.handle, b: T.handle) -> None:
         T.func_attr({"global_symbol": "main", "tir.noalias": True})
         threadIdx_x = T.env_thread("threadIdx.x")
-        A = T.match_buffer(a, [128 * 128], dtype="float32")
+        A = T.match_buffer(a, [16384], dtype="float32")
         for i in T.serial(0, 128):
             T.launch_thread(threadIdx_x, 128)
             reduce_temp0_data = T.allocate([1], "float32", "local")
@@ -3024,7 +3024,7 @@ def comm_reducer_multiple_reduce_groups():
     def comm_reducer_multiple_reduce_groups(a: T.handle, b: T.handle) -> None:
         T.func_attr({"global_symbol": "main", "tir.noalias": True})
         threadIdx_x = T.env_thread("threadIdx.x")
-        A = T.match_buffer(a, [128 * 128], dtype="float32")
+        A = T.match_buffer(a, [16384], dtype="float32")
         for i in T.serial(0, 128):
             T.launch_thread(threadIdx_x, 128)
             reduce_temp0_data = T.allocate([1], "float32", "local")
@@ -3458,6 +3458,15 @@ def bool_cast():
     return func
 
 
+def implicit_evaluate():
+    @T.prim_func
+    def func(A: T.Buffer[1, "int32"]):
+        T.evaluate(T.assume(A[0] == 5))
+        A[0] = 10
+
+    return func
+
+
 ir_generator = tvm.testing.parameter(
     opt_gemm_normalize,
     opt_gemm_lower,
@@ -3509,6 +3518,7 @@ ir_generator = tvm.testing.parameter(
     bool_primitive,
     bool_cast,
     return_none,
+    implicit_evaluate,
 )
 
 
