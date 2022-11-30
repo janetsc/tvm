@@ -229,7 +229,7 @@ TVM_REGISTER_GLOBAL("device_api.hexagon.dma_copy").set_body([](TVMArgs args, TVM
   void* src = args[2];
   int size = args[3];
   ICHECK(size > 0);
-  bool bypass_cache = args[3];
+  bool bypass_cache = args[4];
 
   int ret = DMA_RETRY;
   do {
@@ -297,6 +297,12 @@ TVM_REGISTER_GLOBAL("device_api.hexagon.release_resources")
     .set_body([](TVMArgs args, TVMRetValue* rv) {
       HexagonDeviceAPI* api = HexagonDeviceAPI::Global();
       api->ReleaseResources();
+    });
+
+TVM_REGISTER_GLOBAL("device_api.hexagon.vtcm_device_bytes")
+    .set_body([](TVMArgs args, TVMRetValue* rv) {
+      HexagonDeviceAPI* api = HexagonDeviceAPI::Global();
+      *rv = static_cast<int32_t>(api->VtcmPool()->VtcmDeviceBytes());
     });
 
 TVM_REGISTER_GLOBAL("device_api.hexagon").set_body([](TVMArgs args, TVMRetValue* rv) {

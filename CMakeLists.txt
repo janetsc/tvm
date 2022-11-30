@@ -152,7 +152,7 @@ if(MSVC)
   set(CMAKE_SUPPRESS_REGENERATION ON)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj")
+  add_compile_options(/bigobj)
 
   # MSVC already errors on undefined symbols, no additional flag needed.
   set(TVM_NO_UNDEFINED_SYMBOLS "")
@@ -165,6 +165,8 @@ if(MSVC)
         string(REGEX REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
       endif(${flag_var} MATCHES "/MD")
     endforeach(flag_var)
+    # Static linking. cmake behavior changed in 3.15 making this necessary.
+    add_compile_options(/MT)
   endif()
   # Disable common MSVC warnings
   # Integer conversion warnings(e.g. int64 to int)
