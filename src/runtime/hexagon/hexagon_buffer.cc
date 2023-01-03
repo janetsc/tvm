@@ -242,12 +242,13 @@ void hexagon_buffer_copy_across_regions(const BufferSet& dest, const BufferSet& 
     if (copy_from) {
       qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(copy.src), copy.num_bytes,
                            QURT_MEM_CACHE_FLUSH, QURT_MEM_DCACHE);
-    }
-    memcpy(copy.dest, copy.src, copy.num_bytes);
-    if (!copy_from) {
-      qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(copy.dest), copy.num_bytes,
+    } else {
+      qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(copy.src), copy.num_bytes,
                            QURT_MEM_CACHE_INVALIDATE, QURT_MEM_DCACHE);
     }
+    memcpy(copy.dest, copy.src, copy.num_bytes);
+    qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(copy.dest), copy.num_bytes,
+                         QURT_MEM_CACHE_FLUSH, QURT_MEM_DCACHE);
   }
 }
 
