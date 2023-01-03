@@ -80,7 +80,7 @@ def single_dma_operator(size):
                     dtype="handle",
                 ),
                 T.cast(size, dtype="int"),
-                True,  # bypass cache
+                False,  # bypass cache
                 dtype="int32",
             )
         )

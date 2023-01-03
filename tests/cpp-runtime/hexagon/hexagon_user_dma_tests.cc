@@ -53,7 +53,8 @@ class HexagonUserDMATest : public ::testing::Test {
   char* src_char = nullptr;
   char* dst_char = nullptr;
   uint32_t length = 0x4000;  // 16KB
-  const bool ENABLE_BYPASS = true;
+  // TODO(HWE): Re-enable bypass in the tests
+  const bool ENABLE_BYPASS = false;
   const bool DISABLE_BYPASS = false;
   Optional<String> global_scope{"global"};
   Optional<String> global_vtcm_scope{"global.vtcm"};

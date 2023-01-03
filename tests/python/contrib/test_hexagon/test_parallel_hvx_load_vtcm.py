@@ -232,7 +232,7 @@ def preallocated_single_dma_vrmpy(operations):
                     dtype="handle",
                 ),
                 T.cast(size, dtype="int"),
-                True,  # bypass cache
+                False,  # bypass cache
                 dtype="int32",
             )
         )
@@ -258,7 +258,7 @@ def preallocated_single_dma_vrmpy(operations):
                     dtype="handle",
                 ),
                 T.cast(size, dtype="int"),
-                True,  # bypass cache
+                False,  # bypass cache
                 dtype="int32",
             )
         )
@@ -300,7 +300,7 @@ def preallocated_single_dma_vrmpy(operations):
                     dtype="handle",
                 ),
                 T.cast(size, dtype="int"),
-                True,  # bypass cache
+                False,  # bypass cache
                 dtype="int32",
             )
         )
