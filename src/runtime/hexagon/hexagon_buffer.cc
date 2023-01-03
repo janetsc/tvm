@@ -239,10 +239,7 @@ void hexagon_buffer_copy_across_regions(const BufferSet& dest, const BufferSet& 
     // bypass mode for increased DMA bandwidth
     // TODO(HWE): Switch to ION Buffer to avoid need for memcpy and potentially lighten or alleviate
     // the burden of cache invalidation in this code
-    if (copy_from) {
-      qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(copy.src), copy.num_bytes,
-                           QURT_MEM_CACHE_FLUSH, QURT_MEM_DCACHE);
-    } else {
+    if (!copy_from) {
       qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(copy.src), copy.num_bytes,
                            QURT_MEM_CACHE_INVALIDATE, QURT_MEM_DCACHE);
     }
