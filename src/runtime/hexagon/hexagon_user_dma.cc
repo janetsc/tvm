@@ -73,6 +73,8 @@ int HexagonUserDMA::Copy(int queue_id, void* dst, void* src, uint32_t length, bo
   // VTCM -> DDR with bypass enabled
   if (dst_is_ddr && !src_is_ddr && bypass_cache) {
     dma_desc_set_bypassdst(dma_desc, DESC_BYPASS_ON);
+    qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(dst), length, QURT_MEM_CACHE_INVALIDATE,
+                         QURT_MEM_DCACHE);
   } else {
     dma_desc_set_bypassdst(dma_desc, DESC_BYPASS_OFF);
   }
@@ -80,6 +82,8 @@ int HexagonUserDMA::Copy(int queue_id, void* dst, void* src, uint32_t length, bo
   // DDR -> VTCM with bypass enabled
   if (src_is_ddr && !dst_is_ddr && bypass_cache) {
     dma_desc_set_bypasssrc(dma_desc, DESC_BYPASS_ON);
+    qurt_mem_cache_clean(reinterpret_cast<qurt_addr_t>(src), length, QURT_MEM_CACHE_FLUSH,
+                         QURT_MEM_DCACHE);
   } else {
     dma_desc_set_bypasssrc(dma_desc, DESC_BYPASS_OFF);
   }
